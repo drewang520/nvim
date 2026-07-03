@@ -9,7 +9,7 @@ map('n', '<leader>vb', '<cmd>edit ~/.config/nvim/lua/core/options.lua<CR>', {des
 map('n', '<leader>vk', '<cmd>edit ~/.config/nvim/lua/core/keymaps.lua<CR>', {desc = 'edit keymaps.lua'})
 
 -- 帮助
-map('n', '<leader>h', function()
+map('n', '<leader>h?', function()
   vim.cmd('help ' .. vim.fn.expand('<cword>'))
 end)
 

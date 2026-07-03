@@ -52,6 +52,7 @@ opt.visualbell = false
 opt.termguicolors = true
 opt.updatetime = 250
 opt.scrolloff = 8
+opt.fillchars = { vert = '│', horiz = '─', eob = ' ' }
 
 -- 文件类型检测
 vim.cmd('filetype on')

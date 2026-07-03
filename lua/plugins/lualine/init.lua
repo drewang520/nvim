@@ -22,7 +22,7 @@ return {
       sections = sections.sections,
       inactive_sections = sections.inactive_sections,
       tabline = {},
-      extensions = { "lazy", "nvim-tree", "trouble", "quickfix" },
+      extensions = { "lazy", "trouble", "quickfix" },
     },
   },
 }

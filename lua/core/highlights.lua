@@ -7,7 +7,8 @@ vim.g.onedark_enable_italic = 1
 
 -- 高亮调整（用 vim.api.nvim_set_hl）
 local set_hl = vim.api.nvim_set_hl
-set_hl(0, 'LineNr', { fg = '#BCBEC4', ctermfg = 246 })
+set_hl(0, 'LineNr', { fg = '#5C6370'})
+set_hl(0, 'CursorLineNr', { fg = '#61AFEF', bold = true})
 set_hl(0, 'Comment', { fg = '#5C6370', ctermfg = 243, italic = true })
 set_hl(0, 'CocInlayHint', { fg = '#5C6370', ctermfg = 245, italic = true })
 set_hl(0, 'Normal', { bg = 'NONE', ctermbg = 'NONE' })
@@ -55,4 +56,6 @@ fillchars.verthoriz = "┼"
 fillchars.horizup = "┴"
 fillchars.horizdown = "┬"
 vim.opt.fillchars = fillchars
+
+set_hl(0, 'WinSeparator', {fg = '#3e4451', bg = 'NONE'})
 
