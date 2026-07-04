@@ -1,2 +1,4 @@
-return { 'honza/vim-snippets' }
-
+return {
+	"rafamadriz/friendly-snippets",
+	event = "InsertEnter",
+}

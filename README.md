@@ -210,10 +210,6 @@
 | `gco` | 下方新建一行并注释 |
 | `gcO` | 上方新建一行并注释 |
 
-### auto-pairs.lua（自动括号补全）
-
-无需按键，插入 `(` `{` `[` `"` 等符号时自动补全配对符号。
-
 ### toggleterm.lua（终端）
 
 > ⚠️ 请核对你实际配置中的 `open_mapping`，以下为常见默认值
@@ -317,7 +313,7 @@ map('n', ']b', '<cmd>BufferLineCycleNext<CR>')
 
 > 💡 如需"选中整个函数/类"这类语义级文本对象操作（`af`/`if`/`ac`/`ic`），需要额外安装 `nvim-treesitter/nvim-treesitter-textobjects`，当前配置未包含此插件。
 
----
+
 
 ## 十、原生 Vim/Neovim 通用操作
 
@@ -345,3 +341,384 @@ map('n', ']b', '<cmd>BufferLineCycleNext<CR>')
 1. 前两周高频参照本文档，常用键（`gd`、`K`、`<leader>ff`、`gcc`、`<C-n>`）会逐渐变成肌肉记忆
 2. 记不住的键，随手按 `<leader>?` 或停顿等 which-key 弹窗提示，不必死记
 3. nvim-tree 内按 `g?`、Telescope 用 `:Telescope keymaps` 可以查到实时生效的完整键位表，比本文档更权威（本文档可能因后续配置变动而过时）
+
+## 十一、跳转增强 flash.nvim
+
+##### 1、`s` ：基础跳转
+
+```
+按 s
+在 Normal/
+→ 输入 1-2 个字符（比如你想跳到某处的 "if"）
+→ 屏幕上所有匹配 "if" 的位置会标记一个跳转字母（比如 a、b、c……）
+→ 按对应字母，光标瞬间跳过去
+
+在Visual：
+先 v 进入可视模式，再按 s 跳转，会从当前位置选中到跳转目标，等于快速选中一大段文字。
+
+在Operator-pending:
+比如按 d 之后再按 s，就变成"删除到跳转目标"，比如 ds 然后跳到某处，能一次性删除中间所有内容——这是最强大的组合，等于给任何编辑操作（d/c/y）配上了瞬移能力。
+```
+
+##### 2、`S`：Treesitter语义跳转
+
+```
+按 S
+→ 屏幕上会标出当前作用域内所有 Treesitter 语法节点（函数、类、if块等）
+→ 按标记字母跳转，或者配合可视模式一次性选中整个语法块
+
+适合"我想选中整个函数体"这种场景，比手动 %  或者数缩进精确得多。
+```
+
+##### 3、`r`：Operator-pending模式，远程操作
+
+```
+比如按 yr 然后输入搜索字符跳转，会在光标不移动的情况下，
+对远处那个位置执行 y（复制）操作，完成后光标还在原地
+
+适合"我想复制别处一段文字，但不想来回跳"的场景
+```
+
+##### 4、`R`：Treesitter 搜索跳转（配合 Visual/Operator 模式）
+
+```
+跟 S 类似，但结合了搜索模式，用于更精确地在语法树上定位。
+```
+
+##### 5、`<C-s>`：命令行模式 --搜索时开关flash
+
+```
+当你按 / 或 ? 进入原生搜索模式时，按 <C-s> 可以临时启用/关闭 Flash 的增强效果（标记跳转字母），如果你想要"原生搜索 + Flash 加速跳转"的组合体验。
+```
+
+#### vim原生行内跳转增强： t/T f/F
+
+`f{字符}`  : 光标跳到当前行**下一个**该字符**上面**
+
+`F{字符}` :  光标跳到当前行**上一个**该字符**上面**
+
+`t{字符}`  : 光标跳到当前行下一个该字符**前一位**
+
+`T{字符}`  :光标跳到当前行上一个该字符**后一位**
+
+`;`：重复上一次 f/F/t/T 操作
+
+`,`：反方向重复上一次 f/F/t/T 操作
+
+
+
+## 十二、包裹符号 nvim-surround
+
+`add`:  ys {motion} {char}
+
+```
+ysiw" : 给单词加引号
+ysiw) : 给单词加括号
+ys$"  : 给当前单次到末尾加引号
+```
+
+`delete`: ds {char}
+
+```
+ds(  : 删除包裹的括号
+```
+
+`change`：cs {target}
+
+```
+cd"' : 把单引号改为双引号
+```
+
+## Other、Neovim 底层原理
+
+```
+1. 终端敲 nvim / vim
+   ↓
+2. Neovim 二进制程序启动，初始化 Lua 运行环境（内置 LuaJIT）
+   ↓
+3. 查找并执行用户配置入口文件
+   （查找顺序：~/.config/nvim/init.lua，如果没有则找 init.vim）
+   ↓
+4. 你的 init.lua 从头到尾按顺序执行：
+   4.1 vim.g.mapleader = ','          ← 设置全局变量
+   4.2 require('core.options')        ← 加载并立即执行这个文件
+   4.3 require('core.keymaps')        ← 同上
+   4.4 require('core.autocmds')       ← 同上
+   
+   4.5 设置 lazypath，检查 lazy.nvim 是否已下载，没有就 git clone
+   4.6 vim.opt.rtp:prepend(lazypath)  ← 把 lazy.nvim 加入 Lua 的模块搜索路径
+   4.7 require('lazy').setup({...})   ← 这一步是重头戏，见下方详解
+   4.8 require('core.highlights')     ← 主题和高亮设置
+   ↓
+5. Neovim 主界面渲染出来，等待你输入
+```
+
+### 1、初始配置文件：～.config/nvim/init.lua
+
+```lua
+-- setting mapleader
+-- 定义全局和局部前缀键， 将两者都设为逗号 ,，意味着后续所有以 <Leader> 开头的键盘映射都将使用 , 作为前缀（例如 <Leader>w 变成 ,w）。方便用户自定义快捷键，避免与系统或插件默认按键冲突。
+vim.g.mapleader = ","
+vim.g.maplocalleader = ","
+
+-- load core
+-- require属于lua关键字，用于加载lua模块
+-- 路径为 lua/core/...
+require("core.options")
+require("core.keymaps")
+require("core.autocmds")
+require("core.neovide")
+
+
+-- load plugins  安装与配置Lazy.nvim插件管理器
+-- vim.fn.stdpath("data") 获取 Neovim 的标准数据目录（在 Linux 下通常是 ~/.local/share/nvim）。 拼接出Lazy插件的完整路径lazyPath
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+-- vim.loop.fs_stat(lazypath) 检查该路径是否存在（即 Lazy 是否已被克隆）
+-- 若不存在，则通过 vim.fn.system 执行 git clone 将 Lazy 仓库克隆到该路径（指定 stable 分支，并过滤大文件以加速）。
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable",
+		lazypath,
+	})
+end
+-- 将该路径添加到 Neovim 的 runtimepath 最前面，确保 Lazy 可以被 require 正确加载。
+vim.opt.rtp:prepend(lazypath)
+
+-- 启动Lazy并导入插件列表
+require("lazy").setup({  -- Lazy 的初始化函数，传入一个插件规范表格。
+    -- 表示从 lua/plugins/ 目录下加载插件定义（默认 Lazy 会查找 lua/plugins/ 下的所有 .lua 文件）。
+	{ import = "plugins" }, 
+})
+
+require("core.highlights")
+```
+
+### 2、Lazy.nvim 插件管理器
+
+#### （1）、require('lazy').setup({...})
+
+```
+1. lazy.nvim 扫描 {import = 'plugins'} 指定的目录
+   （也就是 lua/plugins/ 下所有 .lua 文件）
+   ↓
+2. 把每个文件 require 进来，拿到它们 return 的那个 table
+   （这一步只是"读取配置清单"，还没有真正去下载/加载任何插件代码）
+   ↓
+3. lazy.nvim 检查每个插件 spec 里有没有 event/cmd/keys/ft 这类字段：
+   - 如果没有任何触发条件（没写 event/cmd/keys/ft）
+     → 归类为 "start"，会在启动过程中立即加载
+   - 如果写了 event = "VeryLazy"
+     → 注册一个监听器，等 Neovim 触发 VeryLazy 这个事件时才真正加载
+   - 如果写了 cmd = "Telescope"
+     → 先创建一个"假的" :Telescope 命令占位，你真正执行它时才加载插件、
+       然后把命令转交给插件真正的实现
+   - keys/ft 同理，都是"先占位，触发时才真正加载"
+   ↓
+4. 对于需要立即加载（start）的插件：
+   - 把插件的代码目录加入 runtime path（Lua/Vimscript 能找到它的路径）
+   - 如果插件有 plugin/xxx.lua 或 plugin/xxx.vim（插件自带的初始化脚本），自动执行
+   - 如果你的 spec 里写了 config 函数，执行它
+   - 如果你的 spec 里写了 opts（没写 config），
+     lazy.nvim 自动帮你执行 require("插件名").setup(opts)
+   ↓
+5. Neovim 继续往下走，处理 rtp plugins、after 目录等收尾工作
+```
+
+#### （2）、Lazy.nvim常用配置域
+
+##### 1、加载规范 spec loading：决定要不要加载、，什么时候加载、按什么顺序加载
+
+关键字：
+
+`**dependencies**`：依赖声明。告诉Lzay必须先加载其中的插件，再加载当前插件 
+
+`**enabled**`：控制这个插件要不要被启用， 可以是布尔值，也可以是个返回布尔值的函数（比如"只在 Linux 上启用"这种条件判断）
+
+```lua
+{
+  "some/plugin",
+  enabled = vim.fn.has("mac") == 1,   -- 只在 macOS 上加载这个插件
+}
+```
+
+`**cond**`：跟 `enabled` 功能几乎一样, 语义上倾向于"运行时条件判断"
+
+`**priority**`:   配合 `lazy=false`，指定加载优先级（数字越大越早`priority = 1000`）
+
+##### 2、初始化规范： 决定"加载完之后具体执行什么初始化逻辑"
+
+`init`：这是一个函数，**在插件真正被加载（require）之前**执行, 常见用途是设置一些全局变量（`vim.g.xxx`），因为有些插件是通过读取 `vim.g` 里的变量来决定行为的，必须在插件代码跑起来之前就设置好。
+
+```lua
+{
+  "author/plugin",
+  init = function()
+    vim.g.some_plugin_option = 1   -- 插件加载前就得设好这个全局变量，插件内部初始化时会读它
+  end,
+}
+```
+
+`opts`：**自动初始化**，简单场景，插件的 setup 函数直接用这个表就行
+
+```lua
+return {
+  "author/plugin",
+  opts = {
+    some_option = true,
+  },
+}
+-- 等价于 lazy.nvim 自动执行：
+-- require("plugin").setup({ some_option = true })
+```
+
+`config`：**手动初始化**，复杂场景，需要写额外逻辑，不只是传参数
+
+```lua
+return {
+  "author/plugin",
+  config = function()
+    require("plugin").setup({...})
+    -- 还可以在这里额外设置快捷键、高亮组等等
+    vim.keymap.set(...)
+  end,
+}
+```
+
+`main`：告诉 lazy.nvim，这个插件真正要 `require` 的模块名是什么，用于区分插件版本分支
+
+```lua
+{
+  'nvim-treesitter/nvim-treesitter',
+  main = "nvim-treesitter.configs",   -- 如果用旧分支需要这样指定
+}
+```
+
+`build`：插件**装好/更新后**要执行的构建命令
+
+```lua
+{
+  "williamboman/mason.nvim",
+  build = ":MasonUpdate",   -- 装完/更新后自动跑这个 Neovim 命令
+}
+
+-- 也可以是外部命令
+build = "make", -- 有些插件（比如某些用C写了部分逻辑的）需要编译
+```
+
+##### 3、懒加载规范 spec Lazy loading : 决定是否延迟加载该插件
+
+关键字：
+
+`lazy`： 如果为`false`，即强制立即加载（不懒加载）
+
+`event`：
+
+```lua
+event = "VeryLazy"                         -- Neovim启动完成后不久触发（UI相关插件常用）
+event = { "BufReadPre", "BufNewFile" }      -- 打开文件时触发（文件内容相关插件常用）
+event = "InsertEnter"                        -- 进入插入模式时触发（补全类插件常用）
+```
+
+`cmd`：
+
+```lua
+cmd = "Telescope"                            -- 用户执行某个 :命令 时触发
+cmd = { "G", "Git" }                          -- 可以是多个命令
+```
+
+`ft`：
+
+```lua
+ft = { "python", "lua" }                     -- 打开特定文件类型时触发
+```
+
+`keys`：
+
+```lua
+keys = { "<leader>ff", "<C-n>" }             -- 用户按某个快捷键时触发
+keys = {                                      -- 也可以写详细的（带 desc）
+  { "<leader>ff", desc = "查找文件" },
+}
+```
+
+##### 4、版本规范 spec versioning: 决定"具体用插件的哪个版本/哪份代码"
+
+`branch`：指定拉取这个插件仓库的哪个分支，默认是仓库的默认分支（通常是 `main`/`master`）
+
+```lua
+{
+  'nvim-treesitter/nvim-treesitter',
+  branch = 'main',   -- 明确指定用新架构的 main 分支，而不是维护中的旧 master 分支
+}
+```
+
+`tag`：锁定到某个具体的发布标签（版本号），不随分支更新而变
+
+```lua
+{
+  'nvim-telescope/telescope.nvim',
+  tag = '0.1.8',   -- 固定用这个版本，即使插件后续发新版也不会自动跟着变
+}
+```
+
+`commit`：比 `tag` 更精确，直接锁死到某一次具体的 git 提交哈希，通常用于"这个版本刚好能用，我不想有任何变化"的极端稳定性需求。
+
+```lua
+{
+  "author/plugin",
+  commit = "a1b2c3d4",
+}
+```
+
+`version`：
+
+按语义化版本号（SemVer）区间锁定，比如只用大版本号是 1 的所有更新：
+
+```lua
+{
+  "author/plugin",
+  version = "^1.0.0",   -- 允许 1.x.x 的任何更新，但不允许跳到 2.0.0
+}
+```
+
+**`tag`/`commit`/`version` 三者只需要选一个用**，都是"锁版本"的不同精细程度，一般插件如果发布了规范的 release 版本号，用 `version` 最方便；如果插件压根没发布过版本号（很多小插件是这样），只能用 `tag`（如果有）或 `commit`。
+
+`pin`：布尔值，锁定这个插件不参与 `:Lazy update` 的批量更新，需要单独手动更新。适合"这个插件我不想被自动更新影响，怕出兼容性问题"的场景：
+
+```lua
+{
+  "author/plugin",
+  pin = true,
+}
+```
+
+`submodules`：布尔值，控制 git clone 时要不要顺带拉取这个仓库依赖的 git 子模块（有些插件的仓库结构里内嵌了别的 git 仓库作为子模块）。大多数插件不需要，默认是 `true`，遇到特殊情况才需要手动关掉。
+
+##### 5、高级规范 spec advanced:
+
+`import`：告诉 lazy.nvim 去扫描指定的 Lua 模块路径（对应 `lua/plugins/` 目录）下所有文件，把每个文件当作一个独立的插件 spec 来加载
+
+```lua
+require('lazy').setup({
+    {import = 'plugins'},   -- 这就是 import
+})
+```
+
+`optional`：标记这个 spec 是"可选补充配置"，不是一个独立插件声明。常见用法是：你已经在别处声明过某个插件，现在只是想**给它追加一点额外配置**（比如给某个插件加一个新的 dependency），而不是重新声明一遍整个插件。
+
+```lua
+{
+  "nvim-telescope/telescope.nvim",
+  optional = true,
+  dependencies = { "some-extra-telescope-extension" },  -- 只是想给已有的 telescope 补充一个依赖
+}
+```
+
+`spec`：在一个 spec 内部再声明一批别的 spec，相当于"打包捆绑"，一次性引入多个相关插件。较少见，通常是插件集合类的场景才用得到。
+
+`module`：布尔值，控制 lazy.nvim 要不要自动帮你处理"通过 `require` 触发懒加载"这个机制。默认是 `true`（大多数插件靠 `require` 时才真正加载）。极少数情况你会手动设成 `false`，告诉 lazy.nvim"不要用这套自动机制，我自己控制加载时机"。
+
