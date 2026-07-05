@@ -77,8 +77,25 @@ set_hl(0, "TelescopePreviewBorder", { fg = "#61afef", bg = "#1e222a" })
 set_hl(0, "TelescopeMatching", { fg = "#e5c07b" }) -- 匹配字符颜色
 
 -- -- 设置整个 bufferline 区域的背景色
--- set_hl(0, "BufferLineFill", { bg = "#2d2d2d" }) -- 替换为你想要的颜色[reference:1]
+-- set_hl(0, "BufferLineFill", { bg = "#3e4751" }) -- 替换为你想要的颜色[reference:1]
 -- -- 设置普通 buffer 标签的背景色
--- set_hl(0, "BufferLineBackground", { bg = "#3a3a3a" })
+-- set_hl(0, "BufferLineBackground", { fg = "#5c6370", bg = "#1e2127" })
 -- -- 设置当前激活 buffer 标签的背景色 (可选)
--- set_hl(0, "BufferLineBufferSelected", { bg = "#4a4a4a" })
+set_hl(0, "BufferLineOffsetSeparator", { bg = "#3e4451" })
+set_hl(0, "BufferLineBufferSelected", { bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconLuaSelected", { fg = "#51A0CF", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconCppSelected", { fg = "#519ABA", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconCPlusPlusSelected", { fg = "#F34B7D", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconPySelected", { fg = "#FFBC03", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconJsonSelected", { fg = "#CBCB41", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconMdSelected", { fg = "#DDDDDD", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconMarkdownSelected", { fg = "#DDDDDD", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconCMakeListsSelected", { fg = "#DCE3EB", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconCMakeSelected", { fg = "#DDDDDD", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconGitIgnoreSelected", { fg = "#F54D27", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconHSelected", { fg = "#A074C4", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconLogSelected", { fg = "#DDDDDD", bg = "#3e4451" })
+set_hl(0, "BufferLineDevIconTxtSelected", { fg = "#89E051", bg = "#3e4451" })
+
+set_hl(0, "BufferLineNumbersSelected", { bg = "#3e4451" })
+set_hl(0, "BufferLineCloseButtonSelected", { bg = "#3e4451" })
