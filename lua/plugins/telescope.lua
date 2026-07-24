@@ -16,7 +16,6 @@ return {
 			{ "<leader>fgb", desc = "查看分支" },
 			{ "<leader>fk", desc = "搜索所有已注册的快捷键" },
 			{ "<leader>fc", desc = "搜索所有可用命令" },
-			{ "<leader>fr", desc = "恢复上一次搜索结果" },
 		},
 		config = function()
 			local telescope = require("telescope")

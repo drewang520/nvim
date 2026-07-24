@@ -1,8 +1,16 @@
 local function on_attach(client, bufnr)
 	local map = vim.keymap.set
 	local opts = { buffer = bufnr }
-	map("n", "gd", vim.lsp.buf.definition, opts)
-	map("n", "gr", vim.lsp.buf.references, opts)
+	map("n", "gd", function()
+		require("telescope.builtin").lsp_definitions()
+	end, opts)
+	map("n", "gr", function()
+		require("telescope.builtin").lsp_references()
+	end, opts)
+	map("n", "gi", function()
+		require("telescope.builtin").lsp_implementations()
+	end, opts)
+
 	map("n", "K", vim.lsp.buf.hover, opts)
 	map("n", "<leader>rn", vim.lsp.buf.rename, opts)
 	map("n", "<leader>ca", vim.lsp.buf.code_action, opts)
